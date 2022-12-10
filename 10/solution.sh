@@ -14,11 +14,11 @@ crt() {
     # Move width cursor to next pixel
     width_pixel_index=$((width_pixel_index+1))
 
-    # Check whether sprite match the width pixel index
+    # Draw (empty)pixel
     if [ $width_pixel_index -eq $sprite ] || [ $width_pixel_index -eq $sprite_left_pixel ] || [ $width_pixel_index -eq $sprite_right_pixel ] ; then
-        printf '%s' "#" >> $CRT_OUTPUT
+        CRT="$CRT$(printf '%s' "#")"
     else
-        printf '%s' "." >> $CRT_OUTPUT
+        CRT="$CRT$(printf '%s' ".")"
     fi
 
     # Move height cursor on the next line and set width cursor to 0
@@ -26,7 +26,7 @@ crt() {
         width_pixel_index=-1
         height_pixel_index=$((height_pixel_index+1))
 
-        printf '\n' >> $CRT_OUTPUT
+        CRT="$CRT$(printf '%s' 'n')"
     fi
 }
 
@@ -58,9 +58,10 @@ compute_signal_stregth() {
     echo "Computation aborted cycle count doesn't match milestone"
 }
 
-while read -r line ; do
-    echo "Cycling instruction $line"
-    case ${line} in
+# Main - CPU 
+while read -r instruction ; do
+    echo "Cycling instruction $instruction"
+    case ${instruction} in
         noop)
             CYCLES=$((CYCLES+1)) && compute_signal_stregth $CYCLES $X 
             crt $X
@@ -71,7 +72,7 @@ while read -r line ; do
             CYCLES=$((CYCLES+1)) && compute_signal_stregth $CYCLES $X
             crt $X
 
-            addx_value="${line#* }"
+            addx_value="${instruction#* }"
             X=$((X+addx_value))
             echo "register is - $X"
         ;;
@@ -80,8 +81,14 @@ while read -r line ; do
 done < ${INPUT}
 
 echo "Sum of signal strenghts is $SUM_OF_SIGNALS_STRENGTH"
+echo
 
-
-# Part II
-
-# crt
+echo "CRT MODUL"
+echo "   ||||||||||||||||||||||||||||||||||||||||||||   "
+echo "   ++++++++++++++++++++++++++++++++++++++++++++"
+IFS='n'
+for crt_line in $CRT ; do
+    printf '%s%s%s\n' "   ++" $crt_line "++"
+done
+echo "   ++++++++++++++++++++++++++++++++++++++++++++    "
+echo "   ||||||||||||||||||||||||||||||||||||||||||||   "
